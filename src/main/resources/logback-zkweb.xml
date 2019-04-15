@@ -24,9 +24,7 @@ debug:
 <!--         </layout> -->
 <!--     </appender> -->
 <!-- MaxHistory是对于%d而言的文件个数 -->
-    <appender name="ROLLING_FILE"  class="ch.qos.logback.core.rolling.RollingFileAppender">
-<!--          <Encoding>UTF-8</Encoding> -->
-<!--          <File>${path.log}/default.log</File> -->
+<!--    <appender name="ROLLING_FILE"  class="ch.qos.logback.core.rolling.RollingFileAppender">
          <Prudent>true</Prudent>
          <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
              <FileNamePattern>${path.log}/default-%d{yyyy-MM-dd-HH}-%i.log</FileNamePattern>
@@ -35,9 +33,9 @@ debug:
              <totalSizeCap>10GB</totalSizeCap>  
          </rollingPolicy>
          <encoder>
-             <pattern>[%d{yyyy-MM-dd HH:mm:ss} %-5level %thread  %file:%line] %logger{36} --&gt; %msg%n</pattern>
+             <pattern>[%d{yyyy-MM-dd HH:mm:ss} %-5level %thread  %file:%line] %logger{36} &#45;&#45;&gt; %msg%n</pattern>
          </encoder>
-     </appender>
+     </appender>-->
      <!-- encoder 默认配置为PatternLayoutEncoder -->
      <appender name="STDOUT"  class="ch.qos.logback.core.ConsoleAppender" >
          <encoder>
@@ -45,7 +43,7 @@ debug:
          </encoder>
 
      </appender>
-	<!-- logback为java中的包 -->   
+	<!-- logback为java中的包 -->
   <logger name="Logback">   
   		<level value="WARN" /><!-- "TRACE", "DEBUG" -->
   </logger> 
@@ -64,7 +62,7 @@ debug:
   <logger name="mybatis" level="WARN" additivity="true" />  
   <!--trace,debug,info,warn,error-->
   <root level="info">
-        <appender-ref ref="ROLLING_FILE" />
+        <!--<appender-ref ref="ROLLING_FILE" />-->
         <appender-ref ref="STDOUT" />
   </root>
 </configuration>

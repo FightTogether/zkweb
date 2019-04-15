@@ -1,24 +1,15 @@
 package com.yasenagat.zkweb.util;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.sql.DataSource;
-
 import org.apache.commons.dbutils.QueryRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.sql.DataSource;
+import java.sql.*;
+import java.util.*;
 
 @Component
 public class ZkCfgManagerImpl implements InitializingBean,ZkCfgManager {
@@ -30,7 +21,7 @@ public class ZkCfgManagerImpl implements InitializingBean,ZkCfgManager {
 	//private JdbcConnectionPool cpool = JdbcConnectionPool.create("jdbc:h2:~/zkweb","sa","sa");
 //	private static JdbcConnectionPool cp = JdbcConnectionPool.create("jdbc:h2:tcp://127.0.0.1/~/zkweb","sa","sa"); 
 	private static Connection conn = null;
-	static QueryRunner run = new QueryRunner(H2Util.getDataSource());
+	static QueryRunner run = new QueryRunner(ConnUtil.getDataSource());
 	
 	public ZkCfgManagerImpl() {
 		//cpool.setMaxConnections(20);
@@ -49,13 +40,12 @@ public class ZkCfgManagerImpl implements InitializingBean,ZkCfgManager {
 			try {
 				conn.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
-				log.error(e.getMessage(),e);
+				log.error("close connection error",e);
 			}
 		}
 	}
 	public void destroyPool() {
-		H2Util.destroyDataSource();
+		ConnUtil.destroyDataSource();
 		closeConn();
 //		if(cpool!=null) {
 //			cpool.dispose();
@@ -85,18 +75,10 @@ public class ZkCfgManagerImpl implements InitializingBean,ZkCfgManager {
 			log.error("create table error !ret={}",ret);
 			return false;
 		} catch (Exception e) {
-			e.printStackTrace();
 			log.info("init zkCfg error : {}" , e.getMessage());
-			log.error(e.getMessage(),e);
+			log.error("init zkCfg error:",e);
 		} finally {
-			if(null != ps){
-				try {
-					ps.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-					log.error(e.getMessage(),e);
-				}
-			}
+			ConnUtil.close(ps);
 		}
 		return false;
 	}
@@ -111,18 +93,10 @@ public class ZkCfgManagerImpl implements InitializingBean,ZkCfgManager {
 			ps.setString(4, sessionTimeOut);
 			return ps.executeUpdate()>0;
 		} catch (SQLException e) {
-			e.printStackTrace();
 			log.error("add zkCfg error : {}",e.getMessage());
-			log.error(e.getMessage(),e);
+			log.error("add zkCfg error :",e);
 		} finally {
-			if(null != ps){
-				try {
-					ps.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-					log.error(e.getMessage(),e);
-				}
-			}
+			ConnUtil.close(ps);
 		}
 		return false;
 	}
@@ -145,42 +119,12 @@ public class ZkCfgManagerImpl implements InitializingBean,ZkCfgManager {
 		try {
 			ps = getConnection().prepareStatement("SELECT * FROM ZK "+whereSql);
 			rs = ps.executeQuery();
-			
-			List<Map<String, Object>> list = new ArrayList<Map<String,Object>>();
-			
-			ResultSetMetaData meta = rs.getMetaData();
-			Map<String, Object> map = null;
-			int cols = meta.getColumnCount();
-			while(rs.next()){
-				map = new HashMap<String, Object>();
-				for(int i = 0 ; i < cols ;i++){
-					map.put(meta.getColumnName(i+1), rs.getObject(i+1));
-				}
-				list.add(map);
-			}
-			
+			List<Map<String, Object>> list =ConnUtil.ListHandler.handle(rs);
 			return list;
 		} catch (SQLException e) {
-			e.printStackTrace();
 			log.error(e.getMessage(),e);
 		} finally {
-			if(null != rs){
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-					log.error(e.getMessage(),e);
-				}
-			}
-			if(null != ps){
-				try {
-					ps.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-					log.error(e.getMessage(),e);
-				}
-			}
-			
+			ConnUtil.close(rs,ps);
 		}
 		return null;
 	}
@@ -196,18 +140,10 @@ public class ZkCfgManagerImpl implements InitializingBean,ZkCfgManager {
 			ps.setString(4, id);
 			return ps.executeUpdate()>0;
 		} catch (Exception e) {
-			e.printStackTrace();
 			log.error("update id={} zkCfg error : {}",new Object[]{id,e.getMessage()});
 			log.error(e.getMessage(),e);
 		} finally {
-			if(null != ps){
-				try {
-					ps.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-					log.error(e.getMessage(),e);
-				}
-			}
+			ConnUtil.close(ps);
 		}
 		
 		return false;
@@ -221,18 +157,10 @@ public class ZkCfgManagerImpl implements InitializingBean,ZkCfgManager {
 			ps.setString(1, id);
 			return ps.executeUpdate()>0;
 		} catch (Exception e) {
-			e.printStackTrace();
 			log.error("delete id={} zkCfg error : {}",new Object[]{id,e.getMessage()});
 			log.error(e.getMessage(),e);
 		}  finally {
-			if(null != ps){
-				try {
-					ps.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-					log.error(e.getMessage(),e);
-				}
-			}
+			ConnUtil.close(ps);
 		}
 		return false;
 	}
@@ -255,25 +183,9 @@ public class ZkCfgManagerImpl implements InitializingBean,ZkCfgManager {
 			}
 			return map;
 		} catch (SQLException e) {
-			e.printStackTrace();
 			log.error(e.getMessage(),e);
 		} finally {
-			if(null != rs){
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-					log.error(e.getMessage(),e);
-				}
-			}
-			if(null != ps){
-				try {
-					ps.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-					log.error(e.getMessage(),e);
-				}
-			}
+			ConnUtil.close(rs,ps);
 		}
 		return null;
 	}
@@ -292,40 +204,13 @@ public class ZkCfgManagerImpl implements InitializingBean,ZkCfgManager {
 			ps.setInt(2, rows);
 			rs = ps.executeQuery();
 			
-			List<Map<String, Object>> list = new ArrayList<Map<String,Object>>();
-			
-//			ResultSetMetaData meta = rs.getMetaData();
-			Map<String, Object> map = null;
-//			int cols = meta.getColumnCount();
-			while(rs.next()){
-				map = new HashMap<String, Object>();
-				for(int i = 0 ; i < rs.getMetaData().getColumnCount() ;i++){
-					map.put(rs.getMetaData().getColumnName(i+1), rs.getObject(i+1));
-				}
-				list.add(map);
-			}
+			List<Map<String, Object>> list =ConnUtil.ListHandler.handle(rs);
 			
 			return list;
 		} catch (SQLException e) {
-			e.printStackTrace();
 			log.error(e.getMessage(),e);
 		} finally {
-			if(null != rs){
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-					log.error(e.getMessage(),e);
-				}
-			}
-			if(null != ps){
-				try {
-					ps.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-					log.error(e.getMessage(),e);
-				}
-			}
+			ConnUtil.close(rs,ps);
 		}
 		return new ArrayList<Map<String,Object>>();
 	}
@@ -341,18 +226,10 @@ public class ZkCfgManagerImpl implements InitializingBean,ZkCfgManager {
 			ps.setString(4, sessionTimeOut);
 			return ps.executeUpdate()>0;
 		} catch (SQLException e) {
-			e.printStackTrace();
-			log.error("add zkCfg error : {}",e.getMessage());
-			log.error(e.getMessage(),e);
+			log.error("add zkCfg error :",e);
 		} finally {
-			if(null != ps){
-				try {
-					ps.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-					log.error(e.getMessage(),e);
-				}
-			}
+			ConnUtil.close(ps);
+
 		} 
 		return false;
 	}
@@ -367,26 +244,10 @@ public class ZkCfgManagerImpl implements InitializingBean,ZkCfgManager {
 				 return rs.getInt(1);
 			 }
 		} catch (SQLException e) {
-			e.printStackTrace();
 			log.error("count zkCfg error : {}",e.getMessage());
 			log.error(e.getMessage(),e);
 		} finally {
-			if(null != rs){
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-					log.error(e.getMessage(),e);
-				}
-			}
-			if(null != ps){
-				try {
-					ps.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-					log.error(e.getMessage(),e);
-				}
-			}
+			ConnUtil.close(rs,ps);
 		}
 		return 0;
 	}
@@ -402,29 +263,15 @@ public class ZkCfgManagerImpl implements InitializingBean,ZkCfgManager {
 //			 }
 			 return true;
 		} catch (SQLException e) {
-			//e.printStackTrace();
 			log.error("isTableOk Failed,{}",e.getMessage());
 			try(PreparedStatement psps = getConnection().prepareStatement("drop table ZK")){
 				psps.execute();
 			} catch (SQLException e1) {
-				//e1.printStackTrace();
+				log.error("drop table ZK failed:",e1);
 			}
 			return false;
 		} finally {
-			if(null != rs){
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					//e.printStackTrace();
-				}
-			}
-			if(null != ps){
-				try {
-					ps.close();
-				} catch (SQLException e) {
-					//e.printStackTrace();
-				}
-			}
+			ConnUtil.close(rs,ps);
 		}
 	}
 	

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.yasenagat.zkweb</groupId>
 	<artifactId>zkWeb</artifactId>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 	<version>v1.2.1</version>
 
 	<name>zkWeb</name>
@@ -29,34 +29,16 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
-			<plugin>
-				<artifactId>maven-war-plugin</artifactId>
-<!-- 				<configuration> -->
-<!-- 					从target打成war包时的过滤,基准目录是target/zkWeb-v1.1 下面已经过滤了,这里无需再次过滤 -->
-<!-- 					<packagingExcludes>resources/**</packagingExcludes> -->
-<!-- 					从target打成war包时的过滤 ,基准目录是${basedir}/src/main/webapp -->
-<!-- 					<warSourceExcludes>resources/**</warSourceExcludes> -->
-<!-- 					<webResources> -->
-<!-- 			            <resource> -->
-<!-- 			                <directory>src/main/resources/config/${package.environment}</directory> -->
-<!-- 			                <targetPath>WEB-INF/classes/config</targetPath> -->
-<!-- 			                <filtering>true</filtering> -->
-<!-- 			            </resource> -->
-<!-- 			            <resource> -->
-<!-- 			                <directory>${basedir}/src/main/webapp/resources</directory> -->
-<!-- 		                    注意此次必须要放在此目录下才能被访问到jsp -->
-<!-- 			                <targetPath>WEB-INF/classes/resources/</targetPath>  -->
-<!-- 			                <includes> -->
-<!-- 			                    <include>**/**</include> -->
-<!-- 			                </includes> -->
-<!-- 			            </resource> -->
-<!-- 			        </webResources> -->
-<!-- 				</configuration> -->
-			</plugin>
+			<!-- <plugin> -->
+			<!-- <artifactId>maven-war-plugin</artifactId> -->
+			<!-- <version>3.2.2</version> -->
+			<!-- <configuration> -->
+			<!-- </configuration> -->
+			<!-- </plugin> -->
 		</plugins>
 	</build>
 	<dependencies>
-		<!-- <dependency> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starters</artifactId> 
+		<!-- <dependency> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starters</artifactId>
 			<version>2.0.2.RELEASE</version> <type>pom</type> </dependency> -->
 		<!-- Spring -->
 		<dependency>
@@ -64,23 +46,22 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-thymeleaf</artifactId>
-        </dependency>
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.springframework.boot</groupId> -->
-<!-- 			<artifactId>spring-boot-starter-data-jpa</artifactId> -->
-<!-- 		</dependency> -->
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+		</dependency>
+		<!-- 		<dependency> -->
+		<!-- 			<groupId>org.springframework.boot</groupId> -->
+		<!-- 			<artifactId>spring-boot-starter-data-jpa</artifactId> -->
+		<!-- 		</dependency> -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 			<optional>true</optional> <!-- 这个需要为 true 热部署才有效 -->
 		</dependency>
-		<dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-tomcat</artifactId>
-            <scope>provided</scope>
-        </dependency>
+		<!-- 		<dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </dependency> -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-jdbc</artifactId>
@@ -90,18 +71,18 @@
 			<artifactId>spring-boot-configuration-processor</artifactId>
 			<optional>true</optional>
 		</dependency>
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.springframework</groupId> -->
-<!-- 			<artifactId>spring-webflux</artifactId> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.springframework.data</groupId> -->
-<!-- 			<artifactId>spring-data-couchbase</artifactId> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.springframework.hateoas</groupId> -->
-<!-- 			<artifactId>spring-hateoas</artifactId> -->
-<!-- 		</dependency> -->
+		<!-- 		<dependency> -->
+		<!-- 			<groupId>org.springframework</groupId> -->
+		<!-- 			<artifactId>spring-webflux</artifactId> -->
+		<!-- 		</dependency> -->
+		<!-- 		<dependency> -->
+		<!-- 			<groupId>org.springframework.data</groupId> -->
+		<!-- 			<artifactId>spring-data-couchbase</artifactId> -->
+		<!-- 		</dependency> -->
+		<!-- 		<dependency> -->
+		<!-- 			<groupId>org.springframework.hateoas</groupId> -->
+		<!-- 			<artifactId>spring-hateoas</artifactId> -->
+		<!-- 		</dependency> -->
 		<dependency>
 			<groupId>org.springframework.session</groupId>
 			<artifactId>spring-session-jdbc</artifactId>
@@ -123,28 +104,15 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>jcl-over-slf4j</artifactId>
-<!-- 			<scope>runtime</scope> -->
+			<!-- 			<scope>runtime</scope> -->
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.fasterxml.jackson.jr</groupId>
 			<artifactId>jackson-jr-all</artifactId>
 		</dependency>
-		<!-- servlet -->
-<!-- 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-			<version>3.0-alpha-1</version>
-			<scope>provided</scope>
-		</dependency> -->
-		
-		<!-- JSP依赖 -->
-<!-- 		<dependency>
-			<groupId>org.apache.tomcat.embed</groupId>
-			<artifactId>tomcat-embed-jasper</artifactId>
-			<scope>provided</scope> 
-		</dependency>
-		<dependency>
+
+		<!-- <dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>jstl</artifactId>
 		</dependency> -->
@@ -197,7 +165,6 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
 	</dependencies>
 
 </project>

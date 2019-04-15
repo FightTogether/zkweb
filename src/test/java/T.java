@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import com.yasenagat.zkweb.util.ConnUtil;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.junit.Test;
 
-import com.yasenagat.zkweb.util.H2Util;
 import com.yasenagat.zkweb.util.ZkCfgFactory;
 import com.yasenagat.zkweb.util.ZkCfgManager;
 import com.yasenagat.zkweb.util.ZkManagerImpl;
@@ -136,7 +136,7 @@ public class T {
 				}
 			};
 
-			QueryRunner run = new QueryRunner(H2Util.getDataSource());
+			QueryRunner run = new QueryRunner(ConnUtil.getDataSource());
 
 			List<Map<String, Object>> result = run.query("SELECT * FROM TEST ", h2);
 			System.out.println(result.size());
