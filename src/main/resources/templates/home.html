@@ -27,7 +27,7 @@
 		    <a href="#" class="easyui-linkbutton" iconCls="icon-save" plain="true" onclick="openUpdateWin()"><span data-locale-html="update">更新</span></a>    
 		    <a href="#" class="easyui-linkbutton" iconCls="icon-no" plain="true" onclick="openDelWin()"><span data-locale-html="remove">删除</span></a>   
 		    <a href="#" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-search'" onclick="setFilter(this)"><span data-locale-html="filter">过滤器</span></a>  
-		    <input id="filterValue" type="text" name="filterValue" value="desc like '%%'" data-locale-attr="filterTitle" title="符合sql规范的where条件">
+		    <input id="filterValue" type="text" name="filterValue" value="" data-locale-attr="filterTitle" title="符合sql规范的where条件">
 		    <input id="selectIndex" type="hidden" name="selectIndex"/>
 		    </td><td align="right">Language:
 		    <input type="hidden" id="isfirstopen" value="0"/>
@@ -78,11 +78,13 @@
 	        <div class="menu-sep"></div>  
 	        <div onclick="expand()"><span data-locale-html="expand">展开</span></div>  
 	        <div onclick="collapse()"><span data-locale-html="collips">收起</span></div>  
-	        <div onclick="refreshtree()"><span data-locale-html="refreshtree">刷新</span></div>  
-	        <div class="menu-sep"></div>  
+	        <div onclick="refreshtree()"><span data-locale-html="refreshtree">刷新</span></div>
+			<div onclick="refreshDevCache()" id="refreshCache" style="display: none"><span data-locale-html="refreshtree">刷新缓存</span></div>
+			<div class="menu-sep"></div>
 	        <div onclick="expandAll()"><span data-locale-html="expandall">展开所有</span></div>  
-	        <div onclick="collapseAll()"><span data-locale-html="collipsall">收起所有</span></div>  
-        </div>
+	        <div onclick="collapseAll()"><span data-locale-html="collipsall">收起所有</span></div>
+
+		</div>
      </div>
     
      <div data-options="region:'center',split:true,collapsed:false,border:false" >  <!-- height:170px;overflow: hidden; -->
