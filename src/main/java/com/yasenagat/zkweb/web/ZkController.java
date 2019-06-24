@@ -1,14 +1,11 @@
 package com.yasenagat.zkweb.web;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletResponse;
-
+import com.fasterxml.jackson.jr.ob.JSON;
+import com.yasenagat.zkweb.model.Tree;
+import com.yasenagat.zkweb.model.TreeRoot;
+import com.yasenagat.zkweb.util.ZkCache;
+import com.yasenagat.zkweb.util.ZkCfgFactory;
+import com.yasenagat.zkweb.util.ZkManager.PropertyPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -18,29 +15,30 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.fasterxml.jackson.jr.ob.JSON;
-import com.yasenagat.zkweb.model.Tree;
-import com.yasenagat.zkweb.model.TreeRoot;
-import com.yasenagat.zkweb.util.ZkCache;
-import com.yasenagat.zkweb.util.ZkCfgFactory;
-import com.yasenagat.zkweb.util.ZkManager.PropertyPanel;
+import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/zk")
 public class ZkController implements DisposableBean{
-	
+
 	private static final Logger log = LoggerFactory.getLogger(ZkController.class);
-	
+
 	@RequestMapping(value="/queryZnodeInfo",produces="text/html;charset=UTF-8")
 	public String queryzNodeInfo(
 			@RequestParam(required=false) String path,
 			Model model,
 			@RequestParam(required=true) String cacheId
 			){
-		
+
 		try {
 			path = URLDecoder.decode(path,"utf-8");
-			log.info("queryzNodeInfo1111 : " + path);
+			log.info("queryzNodeInfo : " + path);
 			if(path != null){
 				model.addAttribute("zkpath", path);
 				model.addAttribute("path",path);
@@ -53,9 +51,9 @@ public class ZkController implements DisposableBean{
 				}
 				model.addAttribute("data", ZkCache.get(cacheId).getData(path).trim());
 				model.mergeAttributes(ZkCache.get(cacheId).getNodeMeta(path));
-				model.addAttribute("acls", ZkCache.get(cacheId).getACLs(path));			
+				model.addAttribute("acls", ZkCache.get(cacheId).getACLs(path));
 			}
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			model.addAttribute("zkpath", path);
@@ -83,7 +81,7 @@ public class ZkController implements DisposableBean{
 			e.printStackTrace();
 			log.info("cacheId[{}] : {}",cacheId,"Disconnected Or Exception");
 		}
-		
+
 		return exmsg;
 	}
 	@RequestMapping(value="/queryZKJMXInfo", produces="application/json;charset=UTF-8")
@@ -91,7 +89,7 @@ public class ZkController implements DisposableBean{
 			@RequestParam(required=true) String simpleFlag,
 			@RequestParam(required=true) String cacheId,HttpServletResponse response
 			){
-		
+
 		try {
 //			model.mergeAttributes(ZkCache.get(cacheId).getJMXInfo());
 //			//model.addAttribute("acls", ZkCache.get(cacheId).getACLs(path));
@@ -104,25 +102,25 @@ public class ZkController implements DisposableBean{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return Collections.emptyList();
 	}
-	
+
 	@RequestMapping(value="/queryZnode")
 	public @ResponseBody List<Tree> query(
 			@RequestParam(required=false) String id,
 			@RequestParam(required=false) String path,
 			@RequestParam(required=true) String cacheId
 			){
-		
+
 		log.info("id : {}",id);
 		log.info("path : {}",path);
 		log.info("cacheId : {}",cacheId);
-		
+
 		TreeRoot root = new TreeRoot();
-		
+
 		if(path == null){
-			
+
 		}else if("/".equals(path)){
 			root.remove(0);
 			List<String> pathList = ZkCache.get(cacheId).getChildren(null);
@@ -143,7 +141,7 @@ public class ZkController implements DisposableBean{
 				log.error("",e);
 			}
 			List<String> pathList = ZkCache.get(cacheId).getChildren(path);
-			
+
 			int i=path.split("/").length*10000;
 			for(String p : pathList){
 				Map<String, Object> atr = new HashMap<String, Object>();
@@ -156,14 +154,14 @@ public class ZkController implements DisposableBean{
 
 		return root;
 	}
-	
+
 	@RequestMapping(value="/saveData",produces="text/html;charset=UTF-8")
 	public @ResponseBody String saveData(
 			@RequestParam() String path,
 			@RequestParam() String data,
 			@RequestParam(required=true) String cacheId
 			){
-		
+
 		try {
 			log.info("data:{}",data);
 			return ZkCache.get(cacheId).setData(path, data)==true ? "保存成功" : "保存失败";
@@ -172,16 +170,53 @@ public class ZkController implements DisposableBean{
 			e.printStackTrace();
 			return "保存失败! Error : " +e.getMessage();
 		}
-		
+
 	}
-	
+	@RequestMapping(value="/batchSaveChildData",produces="text/html;charset=UTF-8")
+	public @ResponseBody String batchSaveChildData(
+			@RequestParam() String parentPath,
+			@RequestParam(required=true) String cacheId
+			){
+
+		try {
+		    String data=System.currentTimeMillis()+"";
+			log.info("data:{}",data);
+			List<String> childrenList=ZkCache.get(cacheId).getChildren(parentPath);
+            for (int i = 0; i <childrenList.size() ; i++) {
+                setLeafNodeData(cacheId,parentPath+"/"+childrenList.get(i),data,true);
+            }
+			return  "保存成功";
+		} catch (Exception e) {
+			log.info("Error : {}",e.getMessage());
+			e.printStackTrace();
+			return "保存失败! Error : " +e.getMessage();
+		}
+
+	}
+
+    private void setLeafNodeData(String cacheId, String parentNodePath, String data, boolean isStraight) throws Exception {
+        List<String> childPathList = ZkCache.get(cacheId).getChildren(parentNodePath);
+        if (childPathList != null && childPathList.size() != 0) {//还有子节点，不算叶子节点
+            if (isStraight && childPathList.size() > 1) {
+                throw new Exception("节点下不能有多个分支！");
+            }
+            for (String childPath : childPathList) {
+                setLeafNodeData(cacheId, parentNodePath+"/"+childPath, data, isStraight);
+            }
+        } else {
+            if(!ZkCache.get(cacheId).setData(parentNodePath, data)){
+                throw new Exception("节点["+parentNodePath+"]设置值["+data+"]失败!");
+            }
+        }
+    }
+
 	@RequestMapping(value="/createNode",produces="text/html;charset=UTF-8")
 	public @ResponseBody String createNode(
 			@RequestParam() String path,
 			@RequestParam() String nodeName,
 			@RequestParam(required=true) String cacheId
 			){
-		
+
 		try {
 			log.info("path:{}",path);
 			log.info("nodeName:{}",nodeName);
@@ -191,15 +226,15 @@ public class ZkController implements DisposableBean{
 			e.printStackTrace();
 			return "保存失败! Error : " +e.getMessage();
 		}
-		
+
 	}
-	
+
 	@RequestMapping(value="/deleteNode",produces="text/html;charset=UTF-8")
 	public @ResponseBody String deleteNode(
 			@RequestParam() String path,
 			@RequestParam(required=true) String cacheId
 			){
-		
+
 		try {
 			log.info("path:{}",path);
 			return ZkCache.get(cacheId).deleteNode(path)==true ? "删除成功" : "删除失败";
@@ -208,7 +243,7 @@ public class ZkController implements DisposableBean{
 			e.printStackTrace();
 			return "删除失败! Error : " +e.getMessage();
 		}
-		
+
 	}
 
 
@@ -216,6 +251,6 @@ public class ZkController implements DisposableBean{
 	public void destroy() throws Exception {
 		log.info("destroyZkCfgManager()...");
 		ZkCfgFactory.createZkCfgManager().destroyPool();
-	} 
-	
+	}
+
 }
